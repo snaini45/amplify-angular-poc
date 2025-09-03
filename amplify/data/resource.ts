@@ -6,7 +6,7 @@ const schema = a.schema({
       owner: a.string().authorization((allow) => [allow.owner()]),
       fileName: a.string(),
       s3Key: a.string(),
-      uploadedAt: a.datetime(), // ❌ no default here
+      uploadedAt: a.datetime(),
     })
     .authorization((allow) => [allow.owner()]),
 });
