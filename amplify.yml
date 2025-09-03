@@ -9,6 +9,10 @@ frontend:
   phases:
     preBuild:
       commands:
+        - nvm install 20
+        - nvm use 20
+        - node -v  # Verify Node version
+        # Check Angular version to ensure everything is set up correctly
         - npx ng version
     build:
       commands:
