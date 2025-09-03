@@ -1,0 +1,10 @@
+<h3>My Uploaded Files</h3>
+
+<ul>
+  <li *ngFor="let f of files; trackBy: trackById">
+    <span>{{ f.fileName }}</span>
+    <button (click)="deleteFile(f.id)">Delete</button>
+  </li>
+</ul>
+
+<p *ngIf="!files.length">No files uploaded yet.</p>
