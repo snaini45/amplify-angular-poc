@@ -1,29 +1,21 @@
-import { type ClientSchema, a, defineData } from '@aws-amplify/backend'
+import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 
-/*== STEP 1 ===============================================================
-Define Todo model with content + isDone fields.
-Authorization: allow public API key *and* owner-based access.
-=========================================================================*/
 const schema = a.schema({
-  Todo: a
+  FileEntry: a
     .model({
-      content: a.string(),
-      isDone: a.boolean().default(false), // new field
+      owner: a.string().authorization((allow) => [allow.owner()]),
+      fileName: a.string(),
+      s3Key: a.string(),
+      uploadedAt: a.datetime(), // ❌ no default here
     })
-    .authorization((allow) => [
-      allow.publicApiKey(), // anyone with API key can CRUD
-      allow.owner(),        // owners can manage their own items
-    ]),
-})
+    .authorization((allow) => [allow.owner()]),
+});
 
-export type Schema = ClientSchema<typeof schema>
+export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: 'userPool',
-    apiKeyAuthorizationMode: {
-      expiresInDays: 30,
-    },
+    defaultAuthorizationMode: 'userPool', // ensures only logged-in users access data
   },
-})
+});
