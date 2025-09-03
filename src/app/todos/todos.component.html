@@ -1,18 +1,31 @@
 <!-- todos.component.html -->
-<main>
+<main class="todos">
+  <header>
     <h1>My todos</h1>
-    <button (click)="createTodo()">+ new</button>
+    <button type="button" (click)="createTodo()">+ New</button>
+  </header>
+
+  <!-- List or empty state -->
+  <section *ngIf="todos.length; else empty">
     <ul>
-        <li 
-            *ngFor="let todo of todos;">
-            {{ todo.content }}
-        </li>
+      <li *ngFor="let t of todos; trackBy: trackById">
+        <span>{{ t.content }}</span>
+        <button type="button" (click)="deleteTodo(t.id)">Delete</button>
+      </li>
     </ul>
+  </section>
+
+  <ng-template #empty>
+    <p aria-live="polite">No todos yet.</p>
+  </ng-template>
+
+  <footer class="info">
     <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/gen2/start/quickstart/">
-            Review next steps of this tutorial.
-        </a>
+      🥳 App successfully hosted. Try creating a new todo.
+      <br />
+      <a href="https://docs.amplify.aws/gen2/start/quickstart/" target="_blank" rel="noopener">
+        Review next steps of this tutorial.
+      </a>
     </div>
+  </footer>
 </main>
