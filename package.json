@@ -20,6 +20,7 @@
     "@angular/router": "^20.2.1",
     "@aws-amplify/ui-angular": "^5.1.3",
     "aws-amplify": "^6.6.6",
+    "@aws-sdk/types": "^3.734.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
