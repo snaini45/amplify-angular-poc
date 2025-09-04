@@ -37,7 +37,11 @@
       "send",
       "serve-static",
       "ws"
-    ]
+    ],
+    "baseUrl": "./",
+    "paths": {
+      "@amplify/*": ["amplify/*"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
