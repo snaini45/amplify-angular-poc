@@ -1,27 +1,34 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../../amplify/data/resource';
 
 const client = generateClient<Schema>();
 
-type FileEntry = Schema['FileEntry']['type'];
-
 @Component({
   selector: 'app-file-list',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './file-list.component.html',
-  styleUrls: ['./file-list.component.css'],
+  template: `<div>
+    <ul>
+      <li *ngFor="let file of files">
+        {{ file.name }} ({{ file.uploadedAt }})
+        <button (click)="delete(file.id)">Delete</button>
+      </li>
+    </ul>
+  </div>`
 })
 export class FileListComponent implements OnInit, OnDestroy {
-  files: FileEntry[] = [];
-  private filesSub: { unsubscribe: () => void } | null = null;
+  files: Schema['File']['type'][] = [];
+  private filesSub?: { unsubscribe(): void };
 
   ngOnInit(): void {
-    this.filesSub = client.models.FileEntry.observeQuery().subscribe({
+    // NOTE: observeQuery expects an input/options arg; pass {} for all items
+    this.filesSub = client.models.File.observeQuery({}).subscribe({
       next: ({ items }) => {
-        this.files = items ?? [];
+        // items is typed; no implicit any
+        this.files = items.slice().sort((a, b) => {
+          const at = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+          const bt = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+          return bt - at;
+        });
       },
       error: (err) => console.error('observeQuery error:', err),
     });
@@ -31,17 +38,7 @@ export class FileListComponent implements OnInit, OnDestroy {
     this.filesSub?.unsubscribe();
   }
 
-  /** ✅ Delete a file entry */
-  async deleteFile(id: string) {
-    try {
-      await client.models.FileEntry.delete({ id });
-      console.log(`File entry with id ${id} deleted`);
-    } catch (error) {
-      console.error('Error deleting file:', error);
-    }
-  }
-
-  trackById(_: number, f: FileEntry) {
-    return f.id;
+  async delete(id: string) {
+    await client.models.File.delete({ id });
   }
 }

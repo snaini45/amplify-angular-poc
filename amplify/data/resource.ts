@@ -1,21 +1,20 @@
-import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
+import { defineData } from '@aws-amplify/backend-data';
+import type { ClientSchema } from '@aws-amplify/data-schema';
+import { a } from '@aws-amplify/data-schema'; // schema builder
 
 const schema = a.schema({
-  FileEntry: a
+  File: a
     .model({
-      owner: a.string().authorization((allow) => [allow.owner()]),
-      fileName: a.string(),
-      s3Key: a.string(),
+      id: a.id(),                 // auto-generated id
+      key: a.string().required(),
+      filename: a.string().required(),
+      size: a.integer(),
+      type: a.string(),
       uploadedAt: a.datetime(),
+      owner: a.string(),
     })
     .authorization((allow) => [allow.owner()]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
-
-export const data = defineData({
-  schema,
-  authorizationModes: {
-    defaultAuthorizationMode: 'userPool', // ensures only logged-in users access data
-  },
-});
+export default defineData({ schema });
