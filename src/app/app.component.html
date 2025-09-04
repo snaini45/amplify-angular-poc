@@ -4,7 +4,11 @@
     let-user="user"
     let-signOut="signOut"
   >
-    <h1>Hello {{ user?.signInDetails?.loginId }}'s todos</h1>
+    <h1>Hello {{ user?.signInDetails?.loginId }}'s files</h1>
+
+    <!-- Show file list -->
+    <app-file-list></app-file-list>
+
     <button (click)="signOut()">Sign Out</button>
   </ng-template>
 </amplify-authenticator>
