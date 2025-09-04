@@ -60,7 +60,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   <ng-template amplifySlot="authenticated">
     <div class="container">
       <header>
-        <h1>My File Uploader</h1>
+        <h1>Upload Container Files</h1>
         <amplify-sign-out></amplify-sign-out>
       </header>
 
@@ -107,7 +107,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 .container { max-width: 880px; margin: 0 auto; padding: 24px; font-family: Inter, system-ui, Arial, sans-serif; }
 header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 h1 { font-size: 24px; margin: 0; }
-.upload, .files { background: #fff; padding: 16px; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; }
+.upload, .files { background: #ffffffff; padding: 16px; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; }
 .upload h2, .files h2 { margin-top: 0; }
 button { padding: 8px 14px; border-radius: 10px; border: 1px solid #e5e7eb; background: #f8fafc; cursor: pointer; margin-left: 8px; }
 button[disabled] { opacity: .5; cursor: not-allowed; }
