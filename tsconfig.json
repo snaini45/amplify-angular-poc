@@ -22,7 +22,22 @@
       "ES2022",
       "dom"
     ],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": [
+      "body-parser",
+      "eslint",
+      "eslint-scope",
+      "estree",
+      "http-errors",
+      "http-proxy",
+      "node",
+      "node-forge",
+      "qs",
+      "retry",
+      "send",
+      "serve-static",
+      "ws"
+    ]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
