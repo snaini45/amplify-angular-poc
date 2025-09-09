@@ -24,7 +24,7 @@ import { FormsModule } from '@angular/forms';
       <span class="title">WMHS</span>
     </header>
 
-    <!-- Search Row -->
+    <!-- Row with Upload, Ship_To, Search, Date -->
     <section class="search-row">
       
       <!-- Upload -->
@@ -33,6 +33,9 @@ import { FormsModule } from '@angular/forms';
         <div class="inline">
           <input type="file" (change)="onFileSelect($event)" />
           <button class="upload-btn" (click)="uploadFile()">Upload</button>
+          <button class="preview-btn" [disabled]="!fileContent" (click)="togglePreview()">
+            {{ showPreview ? 'Hide Preview' : 'Preview' }}
+          </button>
         </div>
       </div>
 
@@ -42,16 +45,34 @@ import { FormsModule } from '@angular/forms';
         <input type="text" [(ngModel)]="search.shipTo" />
       </div>
 
+      <!-- Search (moved right after Ship_To) -->
+      <div class="form-group">
+        <button class="search-btn" (click)="runSearch()">Search</button>
+      </div>
+
       <!-- Date -->
       <div class="form-group">
         <label>Date:</label>
         <input type="date" [(ngModel)]="search.date" />
       </div>
+    </section>
 
-      <!-- Search -->
-      <div class="form-group">
-        <button class="search-btn" (click)="runSearch()">Search</button>
-      </div>
+    <!-- File Preview -->
+    <section *ngIf="showPreview" class="preview">
+      <h3>File Preview: {{ selectedFile?.name }}</h3>
+      <table *ngIf="parsedCsv.length" class="preview-table">
+        <thead>
+          <tr>
+            <th *ngFor="let header of parsedCsv[0]">{{ header }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of parsedCsv.slice(1)">
+            <td *ngFor="let col of row">{{ col }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre *ngIf="!parsedCsv.length">{{ fileContent }}</pre>
     </section>
 
     <!-- Results -->
@@ -72,41 +93,6 @@ import { FormsModule } from '@angular/forms';
   padding: 20px;
   font-family: Arial, sans-serif;
 }
-
-.login-box {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 320px;
-  margin: 80px auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fafafa;
-}
-.login-box h2 {
-  margin: 0 0 10px 0;
-  font-size: 18px;
-  color: #333;
-}
-.login-box input {
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.login-btn {
-  background-color: #2c9c3f;
-  border: none;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-}
-.login-btn:hover {
-  background-color: #248233;
-}
-
 .header {
   display: flex;
   align-items: center;
@@ -121,7 +107,6 @@ import { FormsModule } from '@angular/forms';
   font-weight: bold;
   color: #2c9c3f; 
 }
-
 .search-row {
   display: flex;
   align-items: flex-end;
@@ -129,28 +114,24 @@ import { FormsModule } from '@angular/forms';
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-
 .inline {
   display: flex;
   gap: 10px;
   align-items: center;
 }
-
 .form-group {
   display: flex;
   flex-direction: column;
   font-size: 14px;
   color: #333;
 }
-
 input[type="text"], input[type="date"] {
   padding: 6px 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  min-width: 180px;
+  min-width: 160px;
 }
-
-.upload-btn, .search-btn {
+.login-btn, .upload-btn, .search-btn, .preview-btn {
   background-color: #2c9c3f;
   border: none;
   color: white;
@@ -159,10 +140,25 @@ input[type="text"], input[type="date"] {
   cursor: pointer;
   font-weight: 600;
 }
-.upload-btn:hover, .search-btn:hover {
+.login-btn:hover, .upload-btn:hover, .search-btn:hover, .preview-btn:hover {
   background-color: #248233;
 }
-
+.preview {
+  margin-top: 20px;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+.preview-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.preview-table th, .preview-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+.preview-table th {
+  background-color: #f4f4f4;
+}
 .results {
   margin-top: 20px;
 }
@@ -178,6 +174,9 @@ export class AppComponent {
   search = { shipTo: '', date: '' };
   results: string[] = [];
   selectedFile: File | null = null;
+  fileContent: string | null = null;
+  parsedCsv: string[][] = [];
+  showPreview = false;
 
   enter() {
     if (!this.username.trim()) {
@@ -190,6 +189,23 @@ export class AppComponent {
   onFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;
     this.selectedFile = input.files?.[0] ?? null;
+    this.fileContent = null;
+    this.parsedCsv = [];
+    this.showPreview = false;
+
+    if (this.selectedFile) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.fileContent = reader.result as string;
+
+        if (this.selectedFile?.name.endsWith('.csv')) {
+          this.parsedCsv = this.fileContent
+            .split('\n')
+            .map(line => line.split(',').map(cell => cell.trim()));
+        }
+      };
+      reader.readAsText(this.selectedFile);
+    }
   }
 
   uploadFile() {
@@ -199,6 +215,10 @@ export class AppComponent {
     }
     console.log('Uploading file:', this.selectedFile.name);
     alert(`File "${this.selectedFile.name}" selected for upload`);
+  }
+
+  togglePreview() {
+    this.showPreview = !this.showPreview;
   }
 
   runSearch() {
