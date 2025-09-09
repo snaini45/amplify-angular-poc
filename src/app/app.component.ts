@@ -1,121 +1,116 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AmplifyAuthenticatorModule } from '@aws-amplify/ui-angular';
 import { uploadData, remove, getUrl, list } from 'aws-amplify/storage';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, AmplifyAuthenticatorModule],
+  imports: [CommonModule, FormsModule],
   template: `
-<amplify-authenticator>
-  <ng-template amplifySlot="authenticated">
-    <div class="page">
-      <!-- Header -->
-      <header class="header">
-        <img src="https://www.companieslogo.com/img/orig/WM-c6b6879b.png?download=true" alt="WM Logo" class="logo" />
-        <span class="title">WMHS</span>
-      </header>
+<div class="page">
+  <!-- Header -->
+  <header class="header">
+    <img src="https://www.companieslogo.com/img/orig/WM-c6b6879b.png?download=true" alt="WM Logo" class="logo" />
+    <span class="title">WMHS</span>
+  </header>
 
-      <!-- Upload + Search Row -->
-      <section class="top-row">
-        <!-- File Upload -->
-        <div class="upload-block">
-          <label>Upload:</label>
-          <input type="file" (change)="onFileSelect($event)" />
-          <button class="btn" (click)="uploadFile()" [disabled]="!selectedFile">Upload</button>
-        </div>
-
-        <!-- Show selected file details -->
-        <div class="file-info" *ngIf="selectedFile">
-          <p><b>Selected:</b> {{ selectedFile.name }}</p>
-          <p><b>Type:</b> {{ selectedFile.type || 'Unknown' }}</p>
-          <p><b>Size:</b> {{ formatSize(selectedFile.size) }}</p>
-        </div>
-      </section>
-
-      <!-- Search Row -->
-      <section class="search-row">
-        <!-- Ship_To Search -->
-        <div class="inline">
-          <label>Ship_To:</label>
-          <input type="text" [(ngModel)]="filters.shipTo" />
-          <button class="btn" (click)="filterByShipTo()">Search</button>
-        </div>
-
-        <!-- Date Search -->
-        <div class="inline">
-          <label>Date:</label>
-          <input type="date" [(ngModel)]="filters.date" />
-          <button class="btn" (click)="filterByDate()">Search</button>
-        </div>
-      </section>
-
-      <!-- File List -->
-      <section class="file-list">
-        <h3>Your Files ({{ filteredFiles.length }})</h3>
-        <p *ngIf="!filteredFiles.length">No files uploaded yet.</p>
-        <table *ngIf="filteredFiles.length">
-          <thead>
-            <tr>
-              <th>Filename</th>
-              <th>Type</th>
-              <th>Size</th>
-              <th>Uploaded At</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let f of filteredFiles">
-              <td>{{ f.filename }}</td>
-              <td>{{ f.type }}</td>
-              <td>{{ formatSize(f.size) }}</td>
-              <td>{{ f.uploadedAt | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>
-                <a *ngIf="f.url" [href]="f.url" target="_blank">Open</a>
-                <button class="btn small" (click)="preview(f)">Preview</button>
-                <button class="btn small danger" (click)="delete(f)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <!-- Preview Modal -->
-      <div class="modal" *ngIf="previewFile">
-        <div class="modal-content">
-          <span class="close" (click)="previewFile = null">&times;</span>
-          <h3>Preview: {{ previewFile.filename }}</h3>
-          <p><b>Type:</b> {{ previewFile.type }}</p>
-          <p><b>Size:</b> {{ formatSize(previewFile.size) }}</p>
-          <hr />
-
-          <!-- CSV/TSV -->
-          <table *ngIf="previewFile.type.includes('csv') || previewFile.type.includes('tsv')">
-            <tr *ngFor="let row of previewContent">
-              <td *ngFor="let cell of row">{{ cell }}</td>
-            </tr>
-          </table>
-
-          <!-- JSON -->
-          <pre *ngIf="previewFile.type.includes('json')">{{ previewContent | json }}</pre>
-
-          <!-- Images -->
-          <img *ngIf="previewFile.type.includes('image')" [src]="previewFile.url" style="max-width:100%;" />
-
-          <!-- Other -->
-          <p *ngIf="!previewFile.type.includes('csv') 
-                   && !previewFile.type.includes('tsv') 
-                   && !previewFile.type.includes('json') 
-                   && !previewFile.type.includes('image')">
-            Preview not supported. <a [href]="previewFile.url" target="_blank">Open file</a>.
-          </p>
-        </div>
-      </div>
+  <!-- Upload + Search Row -->
+  <section class="top-row">
+    <!-- File Upload -->
+    <div class="upload-block">
+      <label>Upload:</label>
+      <input type="file" (change)="onFileSelect($event)" />
+      <button class="btn" (click)="uploadFile()" [disabled]="!selectedFile">Upload</button>
     </div>
-  </ng-template>
-</amplify-authenticator>
+
+    <!-- Show selected file details -->
+    <div class="file-info" *ngIf="selectedFile">
+      <p><b>Selected:</b> {{ selectedFile.name }}</p>
+      <p><b>Type:</b> {{ selectedFile.type || 'Unknown' }}</p>
+      <p><b>Size:</b> {{ formatSize(selectedFile.size) }}</p>
+    </div>
+  </section>
+
+  <!-- Search Row -->
+  <section class="search-row">
+    <!-- Ship_To Search -->
+    <div class="inline">
+      <label>Ship_To:</label>
+      <input type="text" [(ngModel)]="filters.shipTo" />
+      <button class="btn" (click)="filterByShipTo()">Search</button>
+    </div>
+
+    <!-- Date Search -->
+    <div class="inline">
+      <label>Date:</label>
+      <input type="date" [(ngModel)]="filters.date" />
+      <button class="btn" (click)="filterByDate()">Search</button>
+    </div>
+  </section>
+
+  <!-- File List -->
+  <section class="file-list">
+    <h3>Your Files ({{ filteredFiles.length }})</h3>
+    <p *ngIf="!filteredFiles.length">No files uploaded yet.</p>
+    <table *ngIf="filteredFiles.length">
+      <thead>
+        <tr>
+          <th>Filename</th>
+          <th>Type</th>
+          <th>Size</th>
+          <th>Uploaded At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let f of filteredFiles">
+          <td>{{ f.filename }}</td>
+          <td>{{ f.type }}</td>
+          <td>{{ formatSize(f.size) }}</td>
+          <td>{{ f.uploadedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <a *ngIf="f.url" [href]="f.url" target="_blank">Open</a>
+            <button class="btn small" (click)="preview(f)">Preview</button>
+            <button class="btn small danger" (click)="delete(f)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Preview Modal -->
+  <div class="modal" *ngIf="previewFile">
+    <div class="modal-content">
+      <span class="close" (click)="previewFile = null">&times;</span>
+      <h3>Preview: {{ previewFile.filename }}</h3>
+      <p><b>Type:</b> {{ previewFile.type }}</p>
+      <p><b>Size:</b> {{ formatSize(previewFile.size) }}</p>
+      <hr />
+
+      <!-- CSV/TSV -->
+      <table *ngIf="previewFile.type.includes('csv') || previewFile.type.includes('tsv')">
+        <tr *ngFor="let row of previewContent">
+          <td *ngFor="let cell of row">{{ cell }}</td>
+        </tr>
+      </table>
+
+      <!-- JSON -->
+      <pre *ngIf="previewFile.type.includes('json')">{{ previewContent | json }}</pre>
+
+      <!-- Images -->
+      <img *ngIf="previewFile.type.includes('image')" [src]="previewFile.url" style="max-width:100%;" />
+
+      <!-- Other -->
+      <p *ngIf="!previewFile.type.includes('csv') 
+               && !previewFile.type.includes('tsv') 
+               && !previewFile.type.includes('json') 
+               && !previewFile.type.includes('image')">
+        Preview not supported. <a [href]="previewFile.url" target="_blank">Open file</a>.
+      </p>
+    </div>
+  </div>
+</div>
   `,
   styles: [`
 .page { background:#fff; min-height:100vh; padding:20px; font-family:Arial,sans-serif; }
@@ -202,8 +197,21 @@ export class AppComponent {
     }
   }
 
+  formatSize(bytes: number): string {
+    if (bytes === 0 || bytes === undefined || bytes === null) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const value = bytes / Math.pow(1024, i);
+    return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+  }
+
   filterByShipTo() {
-    this.filteredFiles = this.files.filter(f => f.filename.includes(this.filters.shipTo));
+    const shipTo = this.filters.shipTo.trim().toLowerCase();
+    if (!shipTo) {
+      this.filteredFiles = this.files;
+      return;
+    }
+    this.filteredFiles = this.files.filter(f => f.filename.toLowerCase().includes(shipTo));
   }
 
   filterByDate() {
@@ -211,17 +219,13 @@ export class AppComponent {
       this.filteredFiles = this.files;
       return;
     }
-    const selectedDate = new Date(this.filters.date).toISOString().split('T')[0];
+    const selected = new Date(this.filters.date);
     this.filteredFiles = this.files.filter(f => {
-      const fileDate = new Date(f.uploadedAt).toISOString().split('T')[0];
-      return fileDate === selectedDate;
-    });
+      if (!f.uploadedAt) return false;
+      const d = new Date(f.uploadedAt);
+      return d.getFullYear() === selected.getFullYear()
+        && d.getMonth() === selected.getMonth()
+        && d.getDate() === selected.getDate();
+      });
+    }
   }
-
-  formatSize(bytes: number): string {
-    if (!bytes) return '0 B';
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
-  }
-}
