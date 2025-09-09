@@ -2,6 +2,11 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AmplifyAuthenticatorModule } from '@aws-amplify/ui-angular';
+import { uploadData } from 'aws-amplify/storage';
+import { generateClient } from 'aws-amplify/api';
+import type { GraphQLResult } from '@aws-amplify/api-graphql';
+
+const client = generateClient();
 
 @Component({
   selector: 'app-root',
@@ -11,26 +16,26 @@ import { AmplifyAuthenticatorModule } from '@aws-amplify/ui-angular';
 <amplify-authenticator>
   <ng-template amplifySlot="authenticated">
     <div class="page">
-      
+
+      <!-- Header -->
       <header class="header">
-        <img src="https://images.search.yahoo.com/search/images;_ylt=AwrhULWmoL9oDQIAEfpXNyoA;_ylu=Y29sbwNiZjEEcG9zAzEEdnRpZAMEc2VjA3BpdnM-?p=WM+Logo&fr2=piv-web&type=G210US1357G91958Mb04d938ffb2bcb05d9cfc7aedeabdd92&fr=mcafee#id=8&iurl=https%3A%2F%2Fassets.stickpng.com%2Fimages%2F6133755882b156000425b3c0.png&action=click" alt="WM Logo" class="logo" />
+        <img src="assets/wm-logo.png" alt="WM Logo" class="logo" />
         <span class="title">WMHS</span>
       </header>
 
-      <!-- Upload file section -->
+      <!-- Upload Section -->
       <section class="upload-section">
         <label for="fileUpload">Upload a file:</label>
         <input type="file" id="fileUpload" (change)="onFileSelect($event)" />
         <button class="upload-btn" (click)="uploadFile()">Upload</button>
       </section>
 
-      <!-- Search form -->
+      <!-- Search Section -->
       <section class="search-container">
         <label>
           Ship_To:
           <input type="text" [(ngModel)]="search.shipTo" />
         </label>
-
         <button class="search-btn" (click)="runSearch()">Search</button>
       </section>
 
@@ -42,13 +47,14 @@ import { AmplifyAuthenticatorModule } from '@aws-amplify/ui-angular';
           <li *ngFor="let item of results">{{ item }}</li>
         </ul>
       </section>
+
     </div>
   </ng-template>
 </amplify-authenticator>
   `,
   styles: [`
 .page {
-  background: #fff; 
+  background: #fff;
   min-height: 100vh;
   padding: 20px;
   font-family: Arial, sans-serif;
@@ -66,9 +72,8 @@ import { AmplifyAuthenticatorModule } from '@aws-amplify/ui-angular';
 .title {
   font-size: 20px;
   font-weight: bold;
-  color: #2c9c3f; 
+  color: #2c9c3f;
 }
-
 
 .upload-section {
   margin-bottom: 20px;
@@ -130,23 +135,52 @@ export class AppComponent {
   results: string[] = [];
   selectedFile: File | null = null;
 
+  // Handle file selection
   onFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;
     this.selectedFile = input.files?.[0] ?? null;
   }
 
-  uploadFile() {
+  // Upload file to S3
+  async uploadFile() {
     if (!this.selectedFile) {
       alert('Please select a file first.');
       return;
     }
-    console.log('Uploading file:', this.selectedFile.name);
-    // TODO: Add Amplify upload logic here
+    try {
+      const key = `${Date.now()}_${this.selectedFile.name}`;
+      await uploadData({
+        key,
+        data: this.selectedFile,
+        options: { contentType: this.selectedFile.type || 'application/octet-stream' }
+      }).result;
+      alert('Upload successful!');
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Upload failed. Check console for details.');
+    }
   }
 
-  runSearch() {
-    console.log('Searching for Ship_To:', this.search.shipTo);
-    // TODO: Replace with real Amplify/DynamoDB query
-    this.results = [`Result for Ship_To: ${this.search.shipTo}`];
+  // Run search by Ship_To (replace with real schema fields)
+  async runSearch() {
+  try {
+    const result = await client.graphql({
+      query: /* GraphQL */ `
+        query SearchFiles($shipTo: String) {
+          listFiles(filter: { shipTo: { eq: $shipTo } }) {
+            items { id filename uploadedAt shipTo }
+          }
+        }
+      `,
+      variables: { shipTo: this.search.shipTo }
+    }) as GraphQLResult<any>;
+
+    this.results = (result.data?.listFiles?.items ?? []).map(
+      (f: any) => `${f.filename} (Ship_To: ${f.shipTo || 'n/a'})`
+    );
+  } catch (err) {
+    console.error('Search failed:', err);
+    alert('Search failed. Check console for details.');
   }
+}
 }
