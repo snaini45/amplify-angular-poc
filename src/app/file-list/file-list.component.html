@@ -1,30 +1,28 @@
-<!-- 🔍 New Search Section -->
-<div class="search-form">
+<div class="search-container">
   <label>
     Upload:
-    <input type="text" placeholder="Enter upload reference" />
+    <input type="text" [(ngModel)]="search.upload" />
   </label>
 
   <label>
     Ship_To:
-    <input type="text" placeholder="Enter Ship_To" />
+    <input type="text" [(ngModel)]="search.shipTo" />
   </label>
 
   <label>
     Date:
-    <input type="date" />
+    <input type="date" [(ngModel)]="search.date" />
   </label>
 
-  <button class="search-btn">Search</button>
+  <button class="search-btn" (click)="runSearch()">Search</button>
 </div>
 
-<h3>Recently Uploaded Files</h3>
-
+<!-- Existing file list -->
+<h3>My Uploaded Files</h3>
 <ul>
-  <li *ngFor="let f of files; trackBy: trackById">
-    <span>{{ f.fileName }}</span>
-    <button (click)="deleteFile(f.id)">Delete</button>
+  <li *ngFor="let file of files">
+    {{ file.filename }} ({{ file.uploadedAt }})
+    <button (click)="delete(file.id)">Delete</button>
   </li>
 </ul>
-
-<p *ngIf="!files.length">No files uploaded yet.</p>
+<p *ngIf="!files.length">No files found.</p>
