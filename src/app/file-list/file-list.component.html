@@ -1,4 +1,24 @@
-<h3>My Uploaded Files</h3>
+<!-- 🔍 New Search Section -->
+<div class="search-form">
+  <label>
+    Upload:
+    <input type="text" placeholder="Enter upload reference" />
+  </label>
+
+  <label>
+    Ship_To:
+    <input type="text" placeholder="Enter Ship_To" />
+  </label>
+
+  <label>
+    Date:
+    <input type="date" />
+  </label>
+
+  <button class="search-btn">Search</button>
+</div>
+
+<h3>Recently Uploaded Files</h3>
 
 <ul>
   <li *ngFor="let f of files; trackBy: trackById">
